@@ -23,8 +23,8 @@ export default function Blackjack(){
     }
 
     /*arrays to store the value and image of each card in the hand*/
-    const playerCards = [];
-    const dealerCards = [];
+    const [playerCards, setPlayerCards] = useState([]);
+    const [dealerCards, setDealerCards] = useState([]);
 
     /*stores the image of the dealers second card since it will be face down to start*/
     const [hiddenCard, setHiddenCard] = useState("");
@@ -40,16 +40,14 @@ export default function Blackjack(){
     /*stores whether or not the player is in the middle of a game*/
     const [inGame, setInGame] = useState(false);
 
-    /*stores the result of the game: win, push, or loss*/
-    const [result, setResult] = useState("");
+    /*stores the codes of the cards that need to be returned to the deck*/
+    //const [returnToDeck, setReturnToDeck] = useState([]);
 
-    /*stores the values of each hand*/
-    const [dealerValue, setDealerValue] = useState('0');
-    const [playerValue, setPlayerValue] = useState('0');
-
-    /*update the bet*/
+    /*update the bet if the player is not in the middle of a game*/
     function handleChange(){
-        setBet(document.getElementById("bet").value);
+        if(!inGame){
+            setBet(document.getElementById("bet").value);
+        }
     }
     /*First replace the value of all kings, queens, jacks with 10, then check for blackjack.
     If no blackjack, iterate through the cards in the hand and start adding them up.
@@ -113,7 +111,28 @@ export default function Blackjack(){
         if((bet > 0) && (bet <= funds) && !inGame){
             console.log('success');
             setInGame(true);
-            setFunds(funds - bet);
+
+            /*locally stores the remaining cards in the deck*/
+            //let cardsRemaining = remaining;
+
+            /*Return any cards drawn in DealerTurn that weren't used to the deck (only matters after first game).
+            Update cardsRemaining. Empty returnToDeck when done*/
+            // if(returnToDeck){
+            //     for(let i = returnToDeck.length - 1; i >= 0; i--){
+            //         console.log(returnToDeck[i]);
+            //         fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/return/?cards='+returnToDeck[i])
+            //         .then((response) => response.json())
+            //         .then((json) => {
+            //             console.log(json);
+            //             cardsRemaining = json.remaining;
+            //             console.log(cardsRemaining);
+            //         })
+            //         .catch((error) => {
+            //             console.error(error);
+            //         });
+            //     }
+            //     setReturnToDeck([]);
+            // }
 
             /*check if the deck needs to be reshuffled*/
             if(remaining < 30){
@@ -128,6 +147,10 @@ export default function Blackjack(){
                         console.error(error);
                     });
             }
+            
+            /*temporary arrays to store the cards locally*/
+            const newPlayerCards = [];
+            const newDealerCards = [];
 
             /*draw the initial 4 cards*/
             fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=4')
@@ -135,32 +158,48 @@ export default function Blackjack(){
                 .then((json) => {   
                     console.log(json);      
                     setRemaining(json.remaining);
-                    playerCards.push({value: json.cards[0].value, image: json.cards[0].image});
-                    dealerCards.push({value: json.cards[1].value, image: json.cards[1].image});
-                    playerCards.push({value: json.cards[2].value, image: json.cards[2].image});
-                    dealerCards.push({value: json.cards[3].value, image: 'https://deckofcardsapi.com/static/img/back.png'});
+                    /*append the new cards to each array*/
+                    newPlayerCards.push({value: json.cards[0].value, image: json.cards[0].image});
+                    newDealerCards.push({value: json.cards[1].value, image: json.cards[1].image}); 
+                    newPlayerCards.push({value: json.cards[2].value, image: json.cards[2].image});
+                    newDealerCards.push({value: json.cards[3].value, image: 'https://deckofcardsapi.com/static/img/back.png'});
+                    setPlayerCards(newPlayerCards);
+                    // playerCards.push({value: json.cards[0].value, image: json.cards[0].image});
+                    // dealerCards.push({value: json.cards[1].value, image: json.cards[1].image});
+                    // playerCards.push({value: json.cards[2].value, image: json.cards[2].image});
+                    // dealerCards.push({value: json.cards[3].value, image: 'https://deckofcardsapi.com/static/img/back.png'});
                     setHiddenCard(json.cards[3].image);
-                    console.log(playerCards);
-                    console.log(dealerCards);
+                    console.log(newPlayerCards);
+                    console.log(newDealerCards);
                     console.log(remaining);
-                    console.log(getValue(playerCards));
+                    console.log(getValue(newPlayerCards));
+                    console.log(getValue(newDealerCards));
+                     /*check for blackjacks, set result if necessary, show hidden card if there is a blackjack*/
+                    if(getValue(newDealerCards) == 'blackjack'){
+                        if(getValue(newPlayerCards) == 'blackjack'){
+                            payout('push', bet);
+                        }
+                        else{
+                            payout('loss', bet);
+                        }
+                        newDealerCards[1].image = json.cards[3].image;
+                        setDealerCards(newDealerCards);
+                    }
+                    else if(getValue(newPlayerCards) == 'blackjack'){
+                        payout('blackjack win', bet);
+                        newDealerCards[1].image = json.cards[3].image;
+                        setDealerCards(newDealerCards);
+                    }
+                    else{
+                        console.log('no blackjacks');
+                        console.log(getValue(newPlayerCards));
+                        console.log(getValue(newDealerCards));
+                        setDealerCards(newDealerCards);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
                 });
-            
-            /*check for blackjacks, set result if necessary*/
-            if(getValue(dealerCards) == 'blackjack'){
-                if(getValue(playerCards) == 'blackjack'){
-                    setResult('push');
-                }
-                else{
-                    setResult('loss');
-                }
-            }
-            else if(getValue(playerCards) == 'blackjack'){
-                setResult('win');
-            }
         }
         else{
             console.log('failure');
@@ -171,21 +210,87 @@ export default function Blackjack(){
     If their total is greater than 21, they bust and their turn is over,
     otherwise they can continue playing.*/
     function Hit(){
+        if(inGame){
 
+        }
     }
     /*Joey: After the player has finished their turn, the dealer draws cards until they reach at least 17.
     If the dealer reaches a total greater than 21, they "bust", and the player automatically wins unless they also busted.
     At the end of the dealer's turn they evaluate the player's hand against their own to determine the winner*/
     function DealersTurn(){
-        console.log(remaining);
-        console.log(hiddenCard);
-        console.log(funds);
+        if(inGame){
+            console.log(remaining);
+            console.log(hiddenCard);
+            console.log(funds);
+            console.log(playerCards);
+            console.log(dealerCards);
+            console.log(getValue(playerCards));
+            console.log(getValue(dealerCards));
+
+            /*stores the dealers cards locally, shows the hidden card*/
+            const newDealerCards = dealerCards;
+            newDealerCards[1].image = hiddenCard;
+            //const returnCards = [];
+
+            /*determine when the dealer should stop drawing cards*/
+            function stop(){
+                if(getValue(newDealerCards) == 'bust'){
+                    return true;
+                }
+                else if(getValue(newDealerCards) < 17){
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            }
+
+            /*call the API to draw 10 cards*/
+            fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=10')
+            .then((response) => response.json())
+            .then((json) => {  
+                /*append each card to the dealer's hand until stop returns true or all 10 cards have been added
+                (if all 10 cards are added, there is an error. mathematically, the most the dealer can draw is 9)*/
+                for(let i = 0; i<10; i++){
+                    if(!stop()){
+                        console.log(json);      
+                        newDealerCards.push({value: json.cards[i].value, image: json.cards[i].image});
+                        console.log(newDealerCards);
+                        console.log(getValue(newDealerCards));
+                        if(i == 9){
+                            console.log('loop error');
+                        }
+                    }
+                    else{
+                        console.log('stopped');
+                        // returnCards.push(json.cards[i].code);
+                        // console.log(returnCards);
+                    }
+                }
+                //setReturnToDeck(returnCards);
+
+                /*update appropriate states, then call calculateWinner*/
+                setRemaining(json.remaining);
+                setDealerCards(newDealerCards);
+                console.log(remaining);
+                calculateWinner(newDealerCards, playerCards, bet);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+            console.log('loop done');
+        }
+        else{
+            console.log('not in game');
+        }
     }
 
     /*Demetrius: When the player has exactly two cards in their hand, they can double their bet.
-    They will then draw one card and their turn will be over*/
+    They will then draw one card and their turn will be over and it will be the dealer's turn*/
     function DoubleDown(){
+        if(inGame){
 
+        }
     }
 
     /*This might be tricky to implement since it will require changes to other functions, so we'll only do this if we have time.
@@ -203,8 +308,39 @@ export default function Blackjack(){
     Otherwise whoever has the greatest total wins.
     If the player wins, they recieve a payout equal to their bet. If they lose, they lose their bet.
     If it's a push, they keep their bet, but don't win anything.*/
-    function calculateWinner(){
+    function calculateWinner(dCards, pCards, betAmt){
+        if(getValue(dCards) == 'bust'){
+            payout('win', betAmt);
+        }
+        else if(getValue(pCards) == getValue(dCards)){
+            payout('push', betAmt);
+        }
+        else if(getValue(pCards) > getValue(dCards)){
+            payout('win', betAmt)
+        }
+        else{
+            payout('loss', betAmt);
+        }
+    }
 
+    /*determine the payout based on the result of the game. Set inGame to false*/
+    function payout(result, betAmt){
+        if(result == 'win'){
+            setFunds(funds + parseInt(betAmt));
+            console.log('win');
+        }
+        else if(result == 'push'){
+            console.log('push');
+        }
+        else if(result == 'blackjack win'){
+            setFunds(funds + (1.5*betAmt));
+            console.log('blackjack win');
+        }
+        else{
+            setFunds(funds - betAmt);
+            console.log('loss');
+        }
+        setInGame(false);
     }
 
     /*Han: Arrange and style these elements as you see fit. Also display the total value for each hand,
