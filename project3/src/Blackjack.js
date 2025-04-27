@@ -30,8 +30,8 @@ export default function Blackjack(){
     const [hiddenCard, setHiddenCard] = useState("");
 
     /*use these to dislay each hand*/
-    const playerHand = playerCards.map(playerCard => <div><image src={playerCard.image} /></div>)
-    const dealerHand = dealerCards.map(dealerCard => <div><image src={dealerCard.image} /></div>)
+    const playerHand = playerCards.map(playerCard => <div><img src={playerCard.image} /></div>)
+    const dealerHand = dealerCards.map(dealerCard => <div><img src={dealerCard.image} /></div>)
 
     /*store the players funds and current bet*/
     const [funds, setFunds] = useState(1000);
@@ -348,19 +348,36 @@ export default function Blackjack(){
     The player's and dealer's cards should both be displayed as well (images available from API).
     Whenever a card is drawn by the dealer or player, that card should be displayed alongside the rest of the hand.
     Once the game is over, no cards should be displayed. Also display a win/lose message at the end of the game.*/
-    return(
+    return (
         <div>
-            <input
-                type="number"
-                id="bet"
-                value={bet}
-                onChange={handleChange}
-            />
-            <button onClick={Deal}>Place Bet</button>
-            <button onClick={Hit}>Hit</button>
-            <button onClick={DealersTurn}>Stay</button>
-            <button onClick={DoubleDown}>Double Down</button>
-            <button onClick={Split}>Split</button>
+          {/* scoreboard and betting */}
+          <input
+            type="number"
+            id="bet"
+            value={bet}
+            onChange={handleChange}
+          />
+          <button onClick={Deal}>Place Bet</button>
+          <button onClick={Hit}>Hit</button>
+          <button onClick={DealersTurn}>Stay</button>
+          <button onClick={DoubleDown}>Double Down</button>
+          <button onClick={Split}>Split</button>
+      
+          {/* dealer card */}
+          <div>
+            <h2>Dealer</h2>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {dealerHand}
+            </div>
+          </div>
+      
+          {/* player card */}
+          <div>
+            <h2>Player</h2>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {playerHand}
+            </div>
+          </div>
         </div>
-    )
+      );
 }
