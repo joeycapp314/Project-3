@@ -1,32 +1,55 @@
 import React from 'react';
+import Blackjack from './Blackjack';
 
+// Main screen that wraps the Blackjack game
 const GameScreen = () => {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Blackjack</h1>
+    <div style={{ minHeight: '100vh', padding: '24px', backgroundColor: '#f0f0f0' }}>
+      
+      {/* Page title */}
+      <h1 style={{ textAlign: 'center', fontSize: '36px', marginBottom: '24px', fontWeight: 'bold' }}>
+        Blackjack
+      </h1>
 
-      {/* dealer area */}
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">Dealer</h2>
-        <div className="flex space-x-2">
-          <div className="w-16 h-24 bg-gray-300 rounded shadow">🂠</div>
-          <div className="w-16 h-24 bg-white rounded shadow flex items-center justify-center">10♠</div>
+      {/* Main game container */}
+      <div style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      }}>
+
+        {/* Scoreboard and message */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          
+          {/* scores */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '32px',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            marginBottom: '12px',
+          }}>
+            <div>Dealer Score: ??</div>
+            <div>Your Score: ??</div>
+          </div>
+
+          {/* Game result message (placeholder) */}
+          <div style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: 'green',
+          }}>
+            Game Message Here
+          </div>
+
         </div>
-      </div>
 
-      {/* player area */}
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">You</h2>
-        <div className="flex space-x-2">
-          <div className="w-16 h-24 bg-white rounded shadow flex items-center justify-center">7♦</div>
-          <div className="w-16 h-24 bg-white rounded shadow flex items-center justify-center">8♣</div>
-        </div>
-      </div>
+        <Blackjack />
 
-      {/* button */}
-      <div className="text-center mt-6">
-        <button className="bg-green-600 text-white px-4 py-2 rounded mr-2">Hit</button>
-        <button className="bg-red-600 text-white px-4 py-2 rounded">Stand</button>
       </div>
     </div>
   );
