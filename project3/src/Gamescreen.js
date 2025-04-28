@@ -21,32 +21,7 @@ const GameScreen = () => {
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
       }}>
 
-        {/* Scoreboard and message */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          
-          {/* scores */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '32px',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            marginBottom: '12px',
-          }}>
-            <div>Dealer Score: ??</div>
-            <div>Your Score: ??</div>
-          </div>
-
-          {/* Game result message (placeholder) */}
-          <div style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: 'green',
-          }}>
-            Game Message Here
-          </div>
-
-        </div>
+        
 
         <Blackjack />
 

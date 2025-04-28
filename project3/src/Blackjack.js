@@ -40,6 +40,9 @@ export default function Blackjack(){
     /*stores whether or not the player is in the middle of a game*/
     const [inGame, setInGame] = useState(false);
 
+    /*stores the result of the game*/
+    const [gameResult, setGameResult] = useState("");
+
     /*stores the codes of the cards that need to be returned to the deck*/
     //const [returnToDeck, setReturnToDeck] = useState([]);
 
@@ -95,6 +98,34 @@ export default function Blackjack(){
             return highValue;
         }
     }
+
+    /*determines whether to show the value of only the dealers first card or all cards, based on whether or not the game has ended*/
+    function dealerValue(){
+        //if(dealerCards){
+            if(inGame && dealerCards[1]){
+                if(dealerCards[1].value == 'ACE'){
+                    if(dealerCards[0].value == 'ACE'){
+                        return getValue(dealerCards) - 1;
+                    }
+                    else{
+                        return getValue(dealerCards) - 11;
+                    }
+                }
+                else if((dealerCards[1].value == 'JACK') || (dealerCards[1].value == 'KING') || (dealerCards[1].value == 'QUEEN')){
+                    return getValue(dealerCards) - 10;
+                }
+                else{
+                    return getValue(dealerCards) - parseInt(dealerCards[1].value);
+                }
+            }
+            else{
+                return getValue(dealerCards);
+            }
+        //}
+        //else{
+            //return 0;
+        //}
+    }
     
     /*Joey: If there are less than 30 cards remaining, shuffle (shuffle function available from API).
     Then, if the player has placed a bet of at least 1 and less than their remaining funds, the initial cards are dealt.
@@ -111,6 +142,7 @@ export default function Blackjack(){
         if((bet > 0) && (bet <= funds) && !inGame){
             console.log('success');
             setInGame(true);
+            setGameResult("");
 
             /*locally stores the remaining cards in the deck*/
             //let cardsRemaining = remaining;
@@ -211,13 +243,19 @@ export default function Blackjack(){
     otherwise they can continue playing.*/
     function Hit(){
         if(inGame){
-
+            //declare a local array to store playerCards
+            //call API to draw a card
+            //inside the API call, append the new card to the local player array, then set playerCards to the local player array
+            //still inside the API call, check if the player busted using getValue(local player array)
+            //if the player busted, declare a local array to store dealerCards, set the image of the second card equal to hiddenCard
+            //then set dealerCards to the local dealer array and call payout('loss', bet)
+            //if the player did not bust, do nothing
         }
     }
     /*Joey: After the player has finished their turn, the dealer draws cards until they reach at least 17.
     If the dealer reaches a total greater than 21, they "bust", and the player automatically wins unless they also busted.
     At the end of the dealer's turn they evaluate the player's hand against their own to determine the winner*/
-    function DealersTurn(){
+    function DealersTurn(pCards, betAmt){
         if(inGame){
             console.log(remaining);
             console.log(hiddenCard);
@@ -273,7 +311,7 @@ export default function Blackjack(){
                 setRemaining(json.remaining);
                 setDealerCards(newDealerCards);
                 console.log(remaining);
-                calculateWinner(newDealerCards, playerCards, bet);
+                calculateWinner(newDealerCards, pCards, betAmt);
             })
             .catch((error) => {
                 console.error(error);
@@ -289,6 +327,14 @@ export default function Blackjack(){
     They will then draw one card and their turn will be over and it will be the dealer's turn*/
     function DoubleDown(){
         if(inGame){
+            //declare a local array to store playerCards
+            //Check if the player has exactly two cards, only execute the function if exactly two cards
+            //declare a local array to store dealerCards, then set the image of the second card equal to hiddenCard
+            //set dealerCards to the local dealer array
+            //call the API to draw a card
+            //inside the API call, append the new card to the local player array, then set playerCards to the local player array
+            //still inside the API call, check if the player busted using getValue(local player array)
+            //if the player busted, call payout('loss', 2*bet), otherwise call DealersTurn(local player array, 2*bet)
 
         }
     }
@@ -340,6 +386,7 @@ export default function Blackjack(){
             setFunds(funds - betAmt);
             console.log('loss');
         }
+        setGameResult(result);
         setInGame(false);
     }
 
@@ -350,18 +397,48 @@ export default function Blackjack(){
     Once the game is over, no cards should be displayed. Also display a win/lose message at the end of the game.*/
     return (
         <div>
+          {/* Scoreboard and message */}
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          
+            {/* scores */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '32px',
+              fontSize: '20px',
+              fontWeight: 'bold',
+              marginBottom: '12px',
+            }}>
+              <div>Dealer Score: {dealerValue()}</div>
+              <div>Your Score: {getValue(playerCards)}</div>
+            </div>
+
+            {/* Game result message (placeholder) */}
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: 'green',
+            }}>
+              {gameResult}
+            </div>
+          </div>
+
           {/* scoreboard and betting */}
-          <input
-            type="number"
-            id="bet"
-            value={bet}
-            onChange={handleChange}
-          />
-          <button onClick={Deal}>Place Bet</button>
-          <button onClick={Hit}>Hit</button>
-          <button onClick={DealersTurn}>Stay</button>
-          <button onClick={DoubleDown}>Double Down</button>
-          <button onClick={Split}>Split</button>
+          <div>
+            <input
+              type="number"
+              id="bet"
+              value={bet}
+              onChange={handleChange}
+            />
+            <button onClick={Deal}>Place Bet</button>
+          </div>
+          <div>
+            <button onClick={Hit}>Hit</button>
+            <button onClick= {() => DealersTurn(playerCards, bet)}>Stay</button>
+            <button onClick={DoubleDown}>Double Down</button>
+            <button onClick={Split}>Split</button>
+          </div>
       
           {/* dealer card */}
           <div>
