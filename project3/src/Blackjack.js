@@ -244,12 +244,41 @@ export default function Blackjack(){
     function Hit(){
         if(inGame){
             //declare a local array to store playerCards
+            const myPlayerCards = playerCards;
             //call API to draw a card
-            //inside the API call, append the new card to the local player array, then set playerCards to the local player array
-            //still inside the API call, check if the player busted using getValue(local player array)
-            //if the player busted, declare a local array to store dealerCards, set the image of the second card equal to hiddenCard
-            //then set dealerCards to the local dealer array and call payout('loss', bet)
-            //if the player did not bust, do nothing
+            fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=10')
+                .then((response) => response.json())
+                .then((json) => {  
+                    console.log(remaining);     //
+                    console.log(hiddenCard);
+                    console.log(funds);
+                    console.log(playerCards);
+                    console.log(dealerCards);
+                    console.log(getValue(playerCards));
+                    console.log(getValue(dealerCards));
+                    //inside the API call, append the new card to the local player array, then set playerCards to the local player array
+                    //still inside the API call, check if the player busted using getValue(local player array)
+                    console.log(json);                                                          //debugging purposes
+                    myPlayerCards.push({value:json.cards[0].value, image:json.cards[0].image}); //appends new card to local player array
+                    setPlayerCards(myPlayerCards);                                              //set playercards to local player array
+                                    
+                    //if the player busted, declare a local array to store dealerCards, set the image of the second card equal to hiddenCard
+                    if(getValue(myPlayerCards) == 'bust' ) {
+                        const myDealerCards = dealerCards;
+                        myDealerCards[1].image = hiddenCard;
+                        setDealerCards(myDealerCards);      //set dealercards to local dealer cards. 
+                        payout('loss', bet);                // call payout function
+                    }
+
+                    console.log(remaining); 
+                    setRemaining(json.remaining);    
+                })
+                .catch((error) => {
+                    console.error(error);
+            });
+        }
+        else {
+            console.log("not in game");     //game is over or has not started. 
         }
     }
     /*Joey: After the player has finished their turn, the dealer draws cards until they reach at least 17.
@@ -257,6 +286,7 @@ export default function Blackjack(){
     At the end of the dealer's turn they evaluate the player's hand against their own to determine the winner*/
     function DealersTurn(pCards, betAmt){
         if(inGame){
+            //debugging help
             console.log(remaining);
             console.log(hiddenCard);
             console.log(funds);
@@ -332,10 +362,53 @@ export default function Blackjack(){
             //declare a local array to store dealerCards, then set the image of the second card equal to hiddenCard
             //set dealerCards to the local dealer array
             //call the API to draw a card
-            //inside the API call, append the new card to the local player array, then set playerCards to the local player array
-            //still inside the API call, check if the player busted using getValue(local player array)
-            //if the player busted, call payout('loss', 2*bet), otherwise call DealersTurn(local player array, 2*bet)
+            const myPlayerCards = playerCards;
+            if (myPlayerCards.length == 2) {
+                const myDealerCards = dealerCards; 
+                myDealerCards[1].image = hiddenCard;
+                setDealerCards(myDealerCards);
 
+                //inside the API call, append the new card to the local player array, then set playerCards to the local player array
+                //still inside the API call, check if the player busted using getValue(local player array)
+                fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=10')
+                    .then((response) => response.json())
+                    .then((json) => {  
+                        // console.log(remaining);     //
+                        // console.log(hiddenCard);
+                        // console.log(funds);
+                        // console.log(playerCards);
+                        // console.log(dealerCards);
+                        // console.log(getValue(playerCards));
+                        // console.log(getValue(dealerCards));
+
+                        console.log(json);                                                          //debugging purposes
+                        myPlayerCards.push({value:json.cards[0].value, image:json.cards[0].image}); //appends new card to local player array
+                        setPlayerCards(myPlayerCards);                                              //set playercards to local player array
+                                        
+                        //if the player busted, call payout('loss', 2*bet), otherwise call DealersTurn(local player array, 2*bet)
+                        if(getValue(myPlayerCards) == 'bust' ) {
+                            payout('loss', 2* bet);                // call payout function
+                        }
+                        else {
+                            DealersTurn(myPlayerCards, 2*bet);
+                        }
+
+                        console.log(remaining); 
+                        console.log("funds are " + funds)
+                        setRemaining(json.remaining);    
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+            else {
+                console.log('cannot double down, have more than 2 cards');
+            }
+
+
+        }
+        else{
+            console.log('not in game');
         }
     }
 
