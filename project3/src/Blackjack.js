@@ -512,6 +512,10 @@ export default function Blackjack(){
             <button onClick={DoubleDown}>Double Down</button>
             <button onClick={Split}>Split</button>
           </div>
+
+            <div style={{ fontWeight: 'bold', marginTop: '12px' }}>
+              Funds: ${funds}
+            </div>
       
           {/* dealer card */}
           <div>
