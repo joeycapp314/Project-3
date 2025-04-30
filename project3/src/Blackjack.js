@@ -1,4 +1,3 @@
-import Home from './Home';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { useState } from 'react';
@@ -43,15 +42,13 @@ export default function Blackjack(){
     /*stores the result of the game*/
     const [gameResult, setGameResult] = useState("");
 
-    /*stores the codes of the cards that need to be returned to the deck*/
-    //const [returnToDeck, setReturnToDeck] = useState([]);
-
     /*update the bet if the player is not in the middle of a game*/
     function handleChange(){
         if(!inGame){
             setBet(document.getElementById("bet").value);
         }
     }
+
     /*First replace the value of all kings, queens, jacks with 10, then check for blackjack.
     If no blackjack, iterate through the cards in the hand and start adding them up.
     If there is one Ace, 11 is added to highValue and 1 is added to lowValue.
@@ -101,7 +98,6 @@ export default function Blackjack(){
 
     /*determines whether to show the value of only the dealers first card or all cards, based on whether or not the game has ended*/
     function dealerValue(){
-        //if(dealerCards){
             if(inGame && dealerCards[1]){
                 if(dealerCards[1].value == 'ACE'){
                     if(dealerCards[0].value == 'ACE'){
@@ -121,10 +117,6 @@ export default function Blackjack(){
             else{
                 return getValue(dealerCards);
             }
-        //}
-        //else{
-            //return 0;
-        //}
     }
     
     /*Joey: If there are less than 30 cards remaining, shuffle (shuffle function available from API).
@@ -143,28 +135,6 @@ export default function Blackjack(){
             console.log('success');
             setInGame(true);
             setGameResult("");
-
-            /*locally stores the remaining cards in the deck*/
-            //let cardsRemaining = remaining;
-
-            /*Return any cards drawn in DealerTurn that weren't used to the deck (only matters after first game).
-            Update cardsRemaining. Empty returnToDeck when done*/
-            // if(returnToDeck){
-            //     for(let i = returnToDeck.length - 1; i >= 0; i--){
-            //         console.log(returnToDeck[i]);
-            //         fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/return/?cards='+returnToDeck[i])
-            //         .then((response) => response.json())
-            //         .then((json) => {
-            //             console.log(json);
-            //             cardsRemaining = json.remaining;
-            //             console.log(cardsRemaining);
-            //         })
-            //         .catch((error) => {
-            //             console.error(error);
-            //         });
-            //     }
-            //     setReturnToDeck([]);
-            // }
 
             /*check if the deck needs to be reshuffled*/
             if(remaining < 30){
@@ -196,10 +166,6 @@ export default function Blackjack(){
                     newPlayerCards.push({value: json.cards[2].value, image: json.cards[2].image});
                     newDealerCards.push({value: json.cards[3].value, image: 'https://deckofcardsapi.com/static/img/back.png'});
                     setPlayerCards(newPlayerCards);
-                    // playerCards.push({value: json.cards[0].value, image: json.cards[0].image});
-                    // dealerCards.push({value: json.cards[1].value, image: json.cards[1].image});
-                    // playerCards.push({value: json.cards[2].value, image: json.cards[2].image});
-                    // dealerCards.push({value: json.cards[3].value, image: 'https://deckofcardsapi.com/static/img/back.png'});
                     setHiddenCard(json.cards[3].image);
                     console.log(newPlayerCards);
                     console.log(newDealerCards);
@@ -298,7 +264,6 @@ export default function Blackjack(){
             /*stores the dealers cards locally, shows the hidden card*/
             const newDealerCards = dealerCards;
             newDealerCards[1].image = hiddenCard;
-            //const returnCards = [];
 
             /*determine when the dealer should stop drawing cards*/
             function stop(){
@@ -331,11 +296,8 @@ export default function Blackjack(){
                     }
                     else{
                         console.log('stopped');
-                        // returnCards.push(json.cards[i].code);
-                        // console.log(returnCards);
                     }
                 }
-                //setReturnToDeck(returnCards);
 
                 /*update appropriate states, then call calculateWinner*/
                 setRemaining(json.remaining);
@@ -410,14 +372,6 @@ export default function Blackjack(){
         else{
             console.log('not in game');
         }
-    }
-
-    /*This might be tricky to implement since it will require changes to other functions, so we'll only do this if we have time.
-    If a player has two cards of the same value they can split them into two separate hands by matching their initial bet.
-    They can then play out the first hand like normal, then move on to the second hand.
-    Once both hands are done the dealer takes their turn, then each hand is evaluated separately against the dealer*/
-    function Split(){
-
     }
 
     /*Joey: Once the dealer's turn is over, the dealer evaluates the player's hand against their own.
@@ -510,7 +464,6 @@ export default function Blackjack(){
             <button onClick={Hit}>Hit</button>
             <button onClick= {() => DealersTurn(playerCards, bet)}>Stay</button>
             <button onClick={DoubleDown}>Double Down</button>
-            <button onClick={Split}>Split</button>
           </div>
 
             <div style={{ fontWeight: 'bold', marginTop: '12px' }}>
