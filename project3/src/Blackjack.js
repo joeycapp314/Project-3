@@ -363,14 +363,14 @@ export default function Blackjack(){
             //set dealerCards to the local dealer array
             //call the API to draw a card
             const myPlayerCards = playerCards;
-            if (myPlayerCards.length == 2) {
+            if ((myPlayerCards.length == 2) && (funds >= (2*bet))) {
                 const myDealerCards = dealerCards; 
                 myDealerCards[1].image = hiddenCard;
                 setDealerCards(myDealerCards);
 
                 //inside the API call, append the new card to the local player array, then set playerCards to the local player array
                 //still inside the API call, check if the player busted using getValue(local player array)
-                fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=10')
+                fetch('https://deckofcardsapi.com/api/deck/'+deckId+'/draw/?count=1')
                     .then((response) => response.json())
                     .then((json) => {  
                         // console.log(remaining);     //
